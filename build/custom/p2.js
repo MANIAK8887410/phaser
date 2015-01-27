@@ -13643,21 +13643,9 @@ Phaser.Physics.P2 = function (game, config) {
     */
     this.game = game;
 
-    if (typeof config === 'undefined')
+    if (typeof config === 'undefined' || !config.hasOwnProperty('gravity') || !config.hasOwnProperty('broadphase'))
     {
         config = { gravity: [0, 0], broadphase: new p2.SAPBroadphase() };
-    }
-    else
-    {
-        if (!config.hasOwnProperty('gravity'))
-        {
-            config.gravity = [0, 0];
-        }
-
-        if (!config.hasOwnProperty('broadphase'))
-        {
-            config.broadphase = new p2.SAPBroadphase();
-        }
     }
 
     /**
@@ -13986,16 +13974,16 @@ Phaser.Physics.P2.prototype = {
     */
     postBroadphaseHandler: function (event) {
 
-        if (!this.postBroadphaseCallback || event.pairs.length === 0)
-        {
-            return;
-        }
+        var i = event.pairs.length;
 
-        for (var i = event.pairs.length - 2; i >= 0; i -= 2)
+        if (this.postBroadphaseCallback && i > 0)
         {
-            if (event.pairs[i].parent && event.pairs[i+1].parent && !this.postBroadphaseCallback.call(this.callbackContext, event.pairs[i].parent, event.pairs[i+1].parent))
+            while (i -= 2)
             {
-                event.pairs.splice(i, 2);
+                if (event.pairs[i].parent && event.pairs[i+1].parent && !this.postBroadphaseCallback.call(this.callbackContext, event.pairs[i].parent, event.pairs[i+1].parent))
+                {
+                    event.pairs.splice(i, 2);
+                }
             }
         }
 
